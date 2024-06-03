@@ -18,8 +18,7 @@ class ChatComponent extends Component
         return view('livewire.chat-component');
     }
 
-    public function mount($user_id)
-    {
+    public function mount($user_id){
         $this->sender_id = auth()->user()->id;
         $this->receiver_id = $user_id;
         $messages = Message::where(function($query) {
@@ -50,19 +49,23 @@ class ChatComponent extends Component
 
     #[on('echo-private:chat-channel.{sender_id},MessageSendEvent')]
     public function listenForMessage($event){
-       
         $chatMessage = Message::whereId($event['message']['id'])
-        ->with('sender:id,name','receiver:id,name')
-        ->first();
-      
+            ->with('sender:id,name','receiver:id,name')
+            ->first();
+        $this->appendChatMessage($chatMessage);
     }
+    
 
     public function appendChatMessage($message){
-        $this->messages[] = [
-            'id'=> $message->id,
-            "sender"=>$message->sender->name,
-            "receiver"=>$message->receiver->name,
-            "message"=> $message->message,
-        ];
-    }
+    $formattedTime = $message->created_at->setTimezone('Asia/Kolkata')->format('g:i A');
+
+    $this->messages[] = [
+        'id' => $message->id,
+        'sender' => $message->sender->name,
+        'receiver' => $message->receiver->name,
+        'message' => $message->message,
+        'created_at' => $formattedTime,
+    ];
+}
+
 }
