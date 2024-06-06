@@ -13,12 +13,15 @@ class ChatComponent extends Component
     public $receiver_id;
     public $message = '';
     public $messages=[];
+    public $activeUserId;
     public function render()
     {
         return view('livewire.chat-component');
+        
     }
 
     public function mount($user_id){
+        $this->activeUserId = $user_id;
         $this->sender_id = auth()->user()->id;
         $this->receiver_id = $user_id;
         $messages = Message::where(function($query) {
@@ -56,16 +59,18 @@ class ChatComponent extends Component
     }
     
 
-    public function appendChatMessage($message){
-    $formattedTime = $message->created_at->setTimezone('Asia/Kolkata')->format('g:i A');
-
-    $this->messages[] = [
-        'id' => $message->id,
-        'sender' => $message->sender->name,
-        'receiver' => $message->receiver->name,
-        'message' => $message->message,
-        'created_at' => $formattedTime,
-    ];
-}
-
+    public function appendChatMessage($message) {
+        $formattedTime = $message->created_at->setTimezone('Asia/Kolkata')->format('g:i A');
+    
+        $this->messages[] = [
+            'id' => $message->id,
+            'sender_id' => $message->sender_id, 
+            'sender' => $message->sender->name,
+            'receiver' => $message->receiver->name,
+            'message' => $message->message,
+            'created_at' => $message->created_at, 
+            'formatted_time' => $formattedTime,
+        ];
+    }
+    
 }

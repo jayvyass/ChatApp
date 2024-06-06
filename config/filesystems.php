@@ -38,8 +38,8 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'root' => public_path('storage/profile-images'),  // Adjust path if needed
+            'url' => env('APP_URL') . '/storage/profile-images', // Adjust URL if needed
             'visibility' => 'public',
             'throw' => false,
         ],
@@ -53,6 +53,13 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'throw' => false,
+        ],
+        'profile_images' => [
+            'driver' => 'local', // Change to 's3' for cloud storage
+            'root' => public_path('profile-images'),  // Adjust path if needed
+            'url' => env('APP_URL') . '/profile-images', // Adjust URL if needed
+            'visibility' => 'public',
             'throw' => false,
         ],
 

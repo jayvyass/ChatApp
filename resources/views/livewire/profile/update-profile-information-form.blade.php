@@ -5,11 +5,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Livewire\Volt\Component;
+use Livewire\WithFileUploads;
 
 new class extends Component
 {
+   
+    use WithFileUploads;
+
     public string $name = '';
     public string $email = '';
+    public $profile_image;
 
     /**
      * Mount the component.
@@ -29,8 +34,14 @@ new class extends Component
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
+            'profile_image' => ['nullable', 'image', 'max:1024'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
         ]);
+
+        if (isset($validated['profile_image'])) {
+            $path = $this->profile_image->store('profile-images', 'public');
+            $validated['profile_image'] = $path;
+        }
 
         $user->fill($validated);
 
@@ -59,6 +70,18 @@ new class extends Component
         $user->sendEmailVerificationNotification();
 
         Session::flash('status', 'verification-link-sent');
+    }
+    public function updateProfileImage()
+    {
+        $path = $this->profile_image->store('profile-images', 'public'); // Store image
+
+        // Update user's profile_image field in database
+        $user = User::find(auth()->id());
+        $user->profile_image = $path;
+        $user->save();
+
+        // Optional: Flash message or other logic
+        session()->flash('message', 'Profile image updated successfully!');
     }
 }; ?>
 
@@ -104,6 +127,12 @@ new class extends Component
             @endif
         </div>
 
+        <div>
+            <x-input-label for="profile_image" :value="__('Profile Image')" />
+            <input wire:model="profile_image" id="profile_image" name="profile_image" type="file" class="mt-1 block w-full" />
+            <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
+        </div>
+        
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
