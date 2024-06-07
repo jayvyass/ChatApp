@@ -14,7 +14,7 @@
                 <div class="p-6 text-gray-900">
                     @foreach ($users as $index => $user)
                         <div id="user-{{ $user->id }}" class="user-item mt-10 flex items-center p-3" data-user-id="{{ $user->id }}"> 
-                            <img src="{{ asset('storage/profile-images/' . $user->profile_image) }}" alt="{{ $user->name }} profile image" class="w-16 h-16 rounded-full mr-4">
+                            <img src="{{ asset('storage/profile-images/' . $user->profile_image) }}" alt="{{ $user->name }} profile image" class="w-16 h-16 rounded-full mr-4 object-fit" >
                             <a href="javascript:void(0);" onclick="openChat({{ $user->id }})">
                                 <span class="ml-4 text-xl font-bold">{{ $user->name }}</span>
                             </a>
@@ -22,7 +22,7 @@
                         @if ($index == 0)
                             <script>
                                 document.addEventListener('DOMContentLoaded', function() {
-                                    openChat({{ $user->id }});
+                                    displayWelcomeMessage();
                                 });
                             </script>
                         @endif
@@ -32,13 +32,11 @@
             
             <!-- Chat Section (70% width) -->
             <div class="w-2/3 bg-white shadow-sm sm:rounded-lg h-full overflow-hidden relative" id="chat-container" style="height: 100%;">
-                <div class="text-gray-900 h-full overflow-y-auto" id="chat-content">
-                    @livewire('chat-component', ['user_id' => $id])
+                <div class="text-gray-900 h-full overflow-y-auto p-6" id="chat-content">
+                    <!-- Welcome message will be displayed here -->
                 </div>
                 <!-- Send Message Form -->
-                <form wire:submit.prevent="sendMessage" class="absolute bottom-0 rounded-full left-0 w-full bg-blue-100 p-4">
-                    <!-- Your form elements here -->
-                </form>
+               
             </div>
         </div>
     </div>
@@ -59,6 +57,15 @@
                     document.getElementById('chat-content').innerHTML = html;
                 });
         }
+
+        function displayWelcomeMessage() {
+            const userName = @json(auth()->user()->name);
+            const welcomeMessage = `<div class="text-center p-12">
+                                        <h1 class="text-3xl font-bold">Welcome, ${userName}!</h1>
+                                        <p class="text-lg">To the Laravel chat application</p>
+                                    </div>`;
+            document.getElementById('chat-content').innerHTML = welcomeMessage;
+        }
     </script>
 </x-app-layout>
 
@@ -69,12 +76,8 @@
         border-bottom: 4px solid skyblue;
         border-left: 4px solid skyblue;
     }
-    /* .user-item:hover {
-        background-color: lightgray;
-        border-radius: 30px;
-    } */
     .active-user {
-        background-color:skyblue ;
+        background-color: skyblue;
         border-radius: 30px;
         color: black;
     }
