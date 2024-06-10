@@ -1,7 +1,6 @@
 <div class="h-full flex flex-col">
-    <div class="flex-none w-full ounded bg-blue-400 h-20 pt-2 text-white flex justify-between shadow-md items-center">
+    <div class="flex-none w-full bg-blue-400 h-20 pt-2 text-white flex justify-between shadow-md items-center">
         <div class="flex items-center">
-            
             <img src="{{ asset('storage/profile-images/' . $user->profile_image) }}" alt="{{ $user->name }} profile image" class="w-12 h-12 rounded-full ml-3 object-cover">
             <div class="ml-4 font-bold text-lg tracking-wide text-gray-900">{{ $user->name }}</div>
         </div>
@@ -10,60 +9,72 @@
         </svg>
     </div>
     <div class="flex-grow mt-5 mb-20 ml-4 overflow-y-auto">
+    @php
+        $currentDate = null;
+        $lastTimestamp = null;
+        $lastSender = null;
+        $lastMessageSentByUser = null;
+    @endphp
+
+    @foreach ($messages as $key => $message)
         @php
-            $currentDate = null;
-            $lastTimestamp = null;
-            $lastSender = null;
+            $messageDate = \Carbon\Carbon::parse($message['created_at'])->toDateString();
+            $messageTimestamp = \Carbon\Carbon::parse($message['created_at'])->format('Y-m-d H:i');
+            $today = \Carbon\Carbon::today()->toDateString();
+            $yesterday = \Carbon\Carbon::yesterday()->toDateString();
         @endphp
-        @foreach ($messages as $message)
+        @if ($currentDate != $messageDate)
+            <div class="text-center my-2 text-black-600">
+                @if ($messageDate == $today)
+                    Today
+                @elseif ($messageDate == $yesterday)
+                    Yesterday
+                @else
+                    {{ \Carbon\Carbon::parse($message['created_at'])->format('F d, Y') }}
+                @endif
+            </div>
             @php
-                $messageDate = \Carbon\Carbon::parse($message['created_at'])->toDateString();
-                $messageTimestamp = \Carbon\Carbon::parse($message['created_at'])->format('Y-m-d H:i');
-                $today = \Carbon\Carbon::today()->toDateString();
-                $yesterday = \Carbon\Carbon::yesterday()->toDateString();
+                $currentDate = $messageDate;
+                $lastTimestamp = null;
+                $lastSender = null;
+                $lastMessageSentByUser = null;
             @endphp
-            @if ($currentDate != $messageDate)
-                <div class="text-center my-2 text-black-600">
-                    @if ($messageDate == $today)
-                        Today
-                    @elseif ($messageDate == $yesterday)
-                        Yesterday
-                    @else
-                        {{ \Carbon\Carbon::parse($message['created_at'])->format('F d, Y') }}
-                    @endif
-                </div>
-                @php
-                    $currentDate = $messageDate;
-                    $lastTimestamp = null;
-                    $lastSender = null;
-                @endphp
-            @endif
-            @if ($message['sender_id'] != auth()->user()->id)
-                <div class="clearfix w-4/4">
-                    @if ($lastTimestamp != $messageTimestamp || $lastSender != $message['sender_id'])
-                        <div class="text-xs text-gray-600">{{ $message['sender'] }}, {{ \Carbon\Carbon::parse($message['formatted_time'])->format('H:i') }}</div>
-                    @endif
-                    <div class="bg-gray-300 mx-1 my-2 p-4 rounded-lg inline-block"style="max-width: 75%; width: auto;">
+        @endif
+
+        @if ($message['sender_id'] != auth()->user()->id)
+            <div class="clearfix w-4/4">
+                @if ($lastTimestamp != $messageTimestamp || $lastSender != $message['sender_id'])
+                    <div class="text-xs text-gray-600">{{ $message['sender'] }}, {{ \Carbon\Carbon::parse($message['formatted_time'])->format('H:i') }}</div>
+                @endif
+                <div class="bg-gray-300 mx-1 my-2 p-4 rounded-lg inline-block" style="max-width: 75%; width: auto;">
                     {!! nl2br(e($message['message'])) !!}
-                    </div>
                 </div>
-            @else
-                <div class="clearfix w-4/4">
-                    <div class="text-right">
-                        @if ($lastTimestamp != $messageTimestamp || $lastSender != $message['sender_id'])
-                            <div class="text-xs text-gray-600">{{ \Carbon\Carbon::parse($message['formatted_time'])->format('H:i') }}</div>
-                        @endif
-                        <div class="bg-blue-300 mx-1 my-2 p-4 rounded-lg clearfix inline-block" style="max-width: 75%; width: auto;">
+            </div>
+        @else
+            <div class="clearfix w-4/4">
+                <div class="text-right">
+                    @if ($lastTimestamp != $messageTimestamp || $lastSender != $message['sender_id'])
+                        <div class="text-xs text-gray-600">{{ \Carbon\Carbon::parse($message['formatted_time'])->format('H:i') }}</div>
+                    @endif
+                    <div class="bg-blue-300 mx-1 my-2 p-4 rounded-lg clearfix inline-block" style="max-width: 75%; width: auto;">
                         {!! nl2br(e($message['message'])) !!}
-                        </div>
                     </div>
+                    @if ($key == count($messages) - 1)
+                        <div class="text-xs text-gray-500 my-2 mt-1">{{ $message['status'] }}</div>
+                    @endif
                 </div>
-            @endif
+            </div>
             @php
-                $lastTimestamp = $messageTimestamp;
-                $lastSender = $message['sender_id'];
+                $lastMessageSentByUser = $message;
             @endphp
-        @endforeach
+        @endif
+
+        @php
+            $lastTimestamp = $messageTimestamp;
+            $lastSender = $message['sender_id'];
+        @endphp
+    @endforeach
+
     </div>
     <form wire:submit.prevent="sendMessage" class="absolute bottom-0  rounded-full left-0 w-full bg-blue-100">
         <div class="flex justify-between">
@@ -75,3 +86,4 @@
             </button>
         </div>
     </form>
+</div>

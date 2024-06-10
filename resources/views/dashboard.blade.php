@@ -66,6 +66,7 @@
                                     </div>`;
             document.getElementById('chat-content').innerHTML = welcomeMessage;
         }
+        
     </script>
 </x-app-layout>
 

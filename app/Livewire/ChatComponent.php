@@ -35,20 +35,27 @@ class ChatComponent extends Component
         foreach ($messages as $message) {
             $this->appendChatMessage($message);
         }
-
+        $this->markMessagesAsSeen();
         $this->user = User::findOrFail($user_id);
     }
     public function sendMessage(){
+        // Trim the message to remove leading and trailing whitespace
+        $trimmedMessage = trim($this->message);
+        if (empty($trimmedMessage)) {
+            return;
+        }
         $chatMessage = new Message();
-        $chatMessage -> sender_id = $this->sender_id ;
-        $chatMessage -> receiver_id =$this->receiver_id;
-        $chatMessage -> message = $this->message;
+        $chatMessage->sender_id = $this->sender_id;
+        $chatMessage->receiver_id = $this->receiver_id;
+        $chatMessage->message = $this->message;
         $chatMessage->save();
-        $this->appendChatMessage($chatMessage);
-        broadcast(new MessageSendEvent($chatMessage))->toOthers();
 
-        $this->message='';
+        $this->appendChatMessage($chatMessage);
+
+        broadcast(new MessageSendEvent($chatMessage))->toOthers();
+        $this->message = '';
     }
+
 
     #[on('echo-private:chat-channel.{sender_id},MessageSendEvent')]
     public function listenForMessage($event){
@@ -70,7 +77,15 @@ class ChatComponent extends Component
             'message' => $message->message,
             'created_at' => $message->created_at, 
             'formatted_time' => $formattedTime,
+            'status'=> $message->status,
         ];
     }
-    
+    public function markMessagesAsSeen()
+    {
+        Message::where('receiver_id', $this->sender_id)
+            ->where('sender_id', $this->receiver_id)
+            ->where('status', '!=', 'seen')
+            ->update(['status' => 'seen']);
+    }
+
 }
