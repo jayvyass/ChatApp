@@ -32,11 +32,9 @@
             
             <!-- Chat Section (70% width) -->
             <div class="w-2/3 bg-white shadow-sm sm:rounded-lg h-full overflow-hidden relative" id="chat-container" style="height: 100%;">
-                <div class="text-gray-900 h-full overflow-y-auto p-6" id="chat-content">
+                <div class="text-gray-900 h-full p-6" id="chat-content">
                     <!-- Welcome message will be displayed here -->
                 </div>
-                <!-- Send Message Form -->
-               
             </div>
         </div>
     </div>
@@ -51,10 +49,18 @@
             document.getElementById('user-' + userId).classList.add('active-user');
             activeUser = userId;
 
+            // Save the currently active chat user ID to session storage
+            sessionStorage.setItem('activeChatUser', userId);
+
             fetch(`/chat/${userId}`)
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('chat-content').innerHTML = html;
+                        // Execute the script tags contained in the HTML
+                        const scriptElements = document.getElementById('chat-content').getElementsByTagName('script');
+                        for (let i = 0; i < scriptElements.length; i++) {
+                            eval(scriptElements[i].innerText);
+                        }
                 });
         }
 
@@ -66,7 +72,27 @@
                                     </div>`;
             document.getElementById('chat-content').innerHTML = welcomeMessage;
         }
-        
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check session storage for the last opened chat user ID
+            const lastActiveUser = sessionStorage.getItem('activeChatUser');
+
+            // Check local storage to see if the welcome message has been displayed
+            const welcomeMessageDisplayed = localStorage.getItem('welcomeMessageDisplayed');
+
+            if (lastActiveUser) {
+                openChat(lastActiveUser);
+            } else if (!welcomeMessageDisplayed) {
+                displayWelcomeMessage();
+                localStorage.setItem('welcomeMessageDisplayed', 'true');
+            }
+        });
+        var messageContainer = document.getElementById('messageContainer');
+
+        // Function to scroll to the bottom of the container
+        function scrollToBottom() {
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
     </script>
 </x-app-layout>
 
