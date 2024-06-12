@@ -14,6 +14,10 @@ class ChatComponent extends Component
     public $message = '';
     public $messages=[];
     public $activeUserId;
+    public $messageToEdit;
+    public $editedMessageId;
+
+   
     public function render()
     {
         return view('livewire.chat-component');
@@ -37,23 +41,48 @@ class ChatComponent extends Component
         }
         $this->markMessagesAsSeen();
         $this->user = User::findOrFail($user_id);
+        
     }
-    public function sendMessage(){
+
+    public function sendMessage() {
         // Trim the message to remove leading and trailing whitespace
         $trimmedMessage = trim($this->message);
         if (empty($trimmedMessage)) {
             return;
         }
-        $chatMessage = new Message();
-        $chatMessage->sender_id = $this->sender_id;
-        $chatMessage->receiver_id = $this->receiver_id;
-        $chatMessage->message = $this->message;
-        $chatMessage->save();
+        
+        if ($this->editedMessageId) {
+            // Update the existing message
+            $message = Message::find($this->editedMessageId);
+            if ($message) {
+                $message->message = $this->message;
+                $message->save();
+            }
+            
+            // Clear the editing state
+            $this->editedMessageId = null;
+        } else {
+            // Create a new message
+            $chatMessage = new Message();
+            $chatMessage->sender_id = $this->sender_id;
+            $chatMessage->receiver_id = $this->receiver_id;
+            $chatMessage->message = $this->message;
+            $chatMessage->save();
 
-        $this->appendChatMessage($chatMessage);
+            $this->appendChatMessage($chatMessage);
+        }
 
-        broadcast(new MessageSendEvent($chatMessage))->toOthers();
+        // Clear the message input
         $this->message = '';
+        
+    }
+
+    public function editMessage($messageId){
+        $this->editedMessageId = $messageId;
+        $message = Message::find($messageId);
+        if ($message) {
+            $this->message = $message->message;
+        }
     }
 
 
@@ -64,7 +93,6 @@ class ChatComponent extends Component
             ->first();
         $this->appendChatMessage($chatMessage);
     }
-    
 
     public function appendChatMessage($message) {
         $formattedTime = $message->created_at->setTimezone('Asia/Kolkata')->format('g:i A');
@@ -80,6 +108,7 @@ class ChatComponent extends Component
             'status'=> $message->status,
         ];
     }
+
     public function markMessagesAsSeen()
     {
         Message::where('receiver_id', $this->sender_id)
@@ -87,5 +116,35 @@ class ChatComponent extends Component
             ->where('status', '!=', 'seen')
             ->update(['status' => 'seen']);
     }
+
+    public function clearChat() {
+        $this->messages = [];
+    }
+
+    public function deleteChat() {
+        Message::where(function($query) {
+            $query->where('sender_id', $this->sender_id)
+                  ->where('receiver_id', $this->receiver_id);
+        })->orWhere(function($query) {
+            $query->where('sender_id', $this->receiver_id)
+                  ->where('receiver_id', $this->sender_id);
+        })->delete();
+
+        $this->clearChat();
+    }
+public function unsendMessage($messageId)
+    {
+        $message = Message::where('id', $messageId)
+            ->where('sender_id', $this->sender_id)
+            ->first();
+
+        if ($message) {
+            $message->delete();
+            $this->messages = array_filter($this->messages, function ($msg) use ($messageId) {
+                return $msg['id'] !== $messageId;
+            });
+        }
+    }
+    
 
 }
