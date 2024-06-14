@@ -34,7 +34,8 @@ class ChatComponent extends Component
         })->orWhere(function($query) {
             $query->where('sender_id', $this->receiver_id)
                   ->where('receiver_id', $this->sender_id);
-        })->with('sender:id,name', 'receiver:id,name')->get();
+                })->where('mstatus', 'active')  // Only fetch active messages
+                ->with('sender:id,name', 'receiver:id,name')->get();
 
         foreach ($messages as $message) {
             $this->appendChatMessage($message);
@@ -67,6 +68,7 @@ class ChatComponent extends Component
             $chatMessage->sender_id = $this->sender_id;
             $chatMessage->receiver_id = $this->receiver_id;
             $chatMessage->message = $this->message;
+            $chatMessage->mstatus = 'active';
             $chatMessage->save();
 
             $this->appendChatMessage($chatMessage);
@@ -93,21 +95,25 @@ class ChatComponent extends Component
             ->first();
         $this->appendChatMessage($chatMessage);
     }
-
     public function appendChatMessage($message) {
+        if ($message->mstatus !== 'active') {
+            return;  // Skip messages that are not active
+        }
+        
         $formattedTime = $message->created_at->setTimezone('Asia/Kolkata')->format('g:i A');
     
         $this->messages[] = [
             'id' => $message->id,
-            'sender_id' => $message->sender_id, 
+            'sender_id' => $message->sender_id,
             'sender' => $message->sender->name,
             'receiver' => $message->receiver->name,
             'message' => $message->message,
-            'created_at' => $message->created_at, 
+            'created_at' => $message->created_at,
             'formatted_time' => $formattedTime,
-            'status'=> $message->status,
+            'status' => $message->status,
         ];
     }
+    
 
     public function markMessagesAsSeen()
     {
@@ -128,23 +134,22 @@ class ChatComponent extends Component
         })->orWhere(function($query) {
             $query->where('sender_id', $this->receiver_id)
                   ->where('receiver_id', $this->sender_id);
-        })->delete();
-
+        })->update(['mstatus' => 'away']);
+    
         $this->clearChat();
     }
-public function unsendMessage($messageId)
-    {
+    
+    public function unsendMessage($messageId){
         $message = Message::where('id', $messageId)
             ->where('sender_id', $this->sender_id)
             ->first();
 
         if ($message) {
-            $message->delete();
+            $message->update(['mstatus' => 'away']);
             $this->messages = array_filter($this->messages, function ($msg) use ($messageId) {
                 return $msg['id'] !== $messageId;
             });
         }
-    }
-    
+    }   
 
 }
