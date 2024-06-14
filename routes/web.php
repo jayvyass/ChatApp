@@ -19,7 +19,8 @@ Route::get('/dashboard', function() {
                   ->where('mstatus', 'active');
         })->orWhere(function($query) use ($user) {
             $query->where('sender_id', $user->id)
-                  ->where('receiver_id', auth()->user()->id);
+                  ->where('receiver_id', auth()->user()->id)
+                  ->where('mstatus', 'active');
         })->orderBy('created_at', 'desc')->first();
 
         if ($lastMessage) {
@@ -63,10 +64,7 @@ Route::get('/dashboard', function() {
 
     // Sort users by notification count and latest message time
     usort($sortedUsers, function($a, $b) {
-        if ($a['delivered_count'] === $b['delivered_count']) {
-            return $b['last_message_time'] <=> $a['last_message_time'];
-        }
-        return $b['delivered_count'] <=> $a['delivered_count'];
+        return $b['last_message_time'] <=> $a['last_message_time'];
     });
 
     return view('dashboard', [

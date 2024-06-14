@@ -8,7 +8,7 @@
             <svg @click="open = !open" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon-dots-vertical w-8 h-8 mr-2 cursor-pointer">
                 <path class="text-green-100 fill-current" fill-rule="evenodd" d="M12 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
             </svg>
-            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
+            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-blue-100 rounded-md shadow-lg py-2 z-50">
                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" @click="document.getElementById('deleteModal').classList.remove('hidden')">Delete Chat</a>
             </div>
         </div>
@@ -64,7 +64,7 @@
                         <div class="bg-blue-300 mx-1 my-2 p-4 rounded-lg clearfix inline-block relative" style="max-width: 75%; width: auto;" @click="open = !open">
                             {!! nl2br(e($message['message'])) !!}
                             <!-- Dropdown Menu -->
-                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg py-2 z-50">
+                            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-32 bg-blue-100 rounded-md shadow-lg py-2 z-50">
                                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" wire:click="editMessage({{ $message['id'] }})">Edit</a>
                                 <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" wire:click="unsendMessage({{ $message['id'] }})">Unsend</a>
                             </div>
