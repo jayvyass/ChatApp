@@ -87,16 +87,26 @@
     @endforeach
     </div>
  </div>
-    <form id="messageForm" wire:submit.prevent="sendMessage" class="absolute bottom-0 rounded-full left-0 w-full bg-blue-100">
-        <div class="flex justify-between">
+ <form id="messageForm" wire:submit.prevent="sendMessage" class="absolute bottom-0 rounded-full left-0 w-full bg-blue-100">
+    <div class="flex justify-between items-center">
         <textarea id="messageInput" class="flex-grow m-2 py-2 px-4 mr-1 rounded-full border border-gray-300 bg-gray-200 resize-none" rows="1" wire:model.defer="message" placeholder="Message..." style="outline: none; white-space: pre-wrap;">{{ $messageToEdit }}</textarea>
-            <button class="m-2" type="submit" style="outline: none;">
-                <svg class="svg-inline--fa text-blue-400 fa-paper-plane fa-w-16 w-12 h-12 py-2 mr-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="paper-plane" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                    <path fill="currentColor" d="M476 3.2L12.5 270.6c-18.1 10.4-15.8 35.6 2.2 43.2L121 358.4l287.3-253.2c5.5-4.9 13.3 2.6 8.6 8.3L176 407v80.5c0 23.6 28.5 32.9 42.5 15.8L282 426l124.6 52.2c14.2 6 30.4-2.9 33-18.2l72-432C515 7.8 493.3-6.8 476 3.2z"></path>
-                </svg>
-            </button>
-        </div>
-    </form>
+        
+        <!-- Gallery Upload Button -->
+        <!-- <div class="m-2 relative">
+            <input type="file" id="galleryUpload" wire:model.defer="photos" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+            <svg class="svg-inline--fa text-blue-400 fa-image fa-w-16 w-12 h-12 py-2 mr-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="image" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path fill="currentColor" d="M464 448H48c-26.51 0-48-21.49-48-48V112c0-26.51 21.49-48 48-48h416c26.51 0 48 21.49 48 48v288c0 26.51-21.49 48-48 48zM48 80c-17.67 0-32 14.33-32 32v288c0 17.67 14.33 32 32 32h416c17.67 0 32-14.33 32-32V112c0-17.67-14.33-32-32-32H48zm128 96c26.51 0 48 21.49 48 48s-21.49 48-48 48-48-21.49-48-48 21.49-48 48-48zm220.71 221.14l-101.35-136c-4.68-6.27-14.7-6.27-19.38 0l-101.35 136C168.71 405.9 175.19 416 184 416h144c8.81 0 15.29-10.1 12.71-18.86z"></path>
+            </svg>
+        </div> -->
+
+        <button class="m-2" type="submit" style="outline: none;">
+            <svg class="svg-inline--fa text-blue-400 fa-paper-plane fa-w-16 w-12 h-12 py-2 mr-2" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="paper-plane" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path fill="currentColor" d="M476 3.2L12.5 270.6c-18.1 10.4-15.8 35.6 2.2 43.2L121 358.4l287.3-253.2c5.5-4.9 13.3 2.6 8.6 8.3L176 407v80.5c0 23.6 28.5 32.9 42.5 15.8L282 426l124.6 52.2c14.2 6 30.4-2.9 33-18.2l72-432C515 7.8 493.3-6.8 476 3.2z"></path>
+            </svg>
+        </button>
+    </div>
+</form>
+
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden absolute inset-0 flex justify-center items-center">
         <div class="relative p-4 w-full max-w-md h-full md:h-auto">
