@@ -29,9 +29,15 @@
                             </div>
                             <div class="flex items-center justify-between">
                                 @if (isset($lastMessages[$user->id]) && isset($lastMessages[$user->id]['message']))
-                                    <span class="mt-1 text-xs text-gray-500">
-                                        {{ Str::limit($lastMessages[$user->id]['message']->message, 14) }}
-                                    </span>
+                                    @if ($lastMessages[$user->id]['message']->image)
+                                        <span class="mt-1 text-xs text-gray-500">
+                                            Image
+                                        </span>
+                                    @else
+                                        <span class="mt-1 text-xs text-gray-500">
+                                            {{ Str::limit($lastMessages[$user->id]['message']->message, 14) }}
+                                        </span>
+                                    @endif
                                     <div class="ml-auto mt-1 text-xxs text-black-400" style="font-size: 12px;">
                                         {{ $lastMessages[$user->id]['formatted_time'] }}
                                     </div>
@@ -62,75 +68,79 @@
     </div>
 </div>
 
-    <script>
-        let activeUser = null;
+<script>
+    let activeUser = null;
 
-        function openChat(userId) {
-            if (activeUser) {
-                document.getElementById('user-' + activeUser).classList.remove('active-user');
+    function openChat(userId) {
+    if (activeUser) {
+        document.getElementById('user-' + activeUser).classList.remove('active-user');
+    }
+    document.getElementById('user-' + userId).classList.add('active-user');
+    activeUser = userId;
+
+    // Save the currently active chat user ID to session storage
+    sessionStorage.setItem('activeChatUser', userId);
+
+    fetch(`/chat/${userId}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('chat-content').innerHTML = html;
+            // Execute the script tags contained in the HTML
+            const scriptElements = document.getElementById('chat-content').getElementsByTagName('script');
+            for (let i = 0; i < scriptElements.length; i++) {
+                eval(scriptElements[i].innerText);
             }
-            document.getElementById('user-' + userId).classList.add('active-user');
-            activeUser = userId;
-
-            // Save the currently active chat user ID to session storage
-            sessionStorage.setItem('activeChatUser', userId);
-
-            fetch(`/chat/${userId}`)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('chat-content').innerHTML = html;
-                        // Execute the script tags contained in the HTML
-                        const scriptElements = document.getElementById('chat-content').getElementsByTagName('script');
-                        for (let i = 0; i < scriptElements.length; i++) {
-                            eval(scriptElements[i].innerText);
-                        }
-                });
-        }
-
-        function displayWelcomeMessage() {
-            const userName = @json(auth()->user()->name);
-            const welcomeMessage = `<div class="text-center p-12">
-                                        <h1 class="text-3xl font-bold">Welcome, ${userName}!</h1>
-                                        <p class="text-lg">To the Laravel chat application</p>
-                                    </div>`;
-            document.getElementById('chat-content').innerHTML = welcomeMessage;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check session storage for the last opened chat user ID
-            const lastActiveUser = sessionStorage.getItem('activeChatUser');
-
-            // Check local storage to see if the welcome message has been displayed
-            const welcomeMessageDisplayed = localStorage.getItem('welcomeMessageDisplayed');
-
-            if (lastActiveUser) {
-                openChat(lastActiveUser);
-            } else if (!welcomeMessageDisplayed) {
-                displayWelcomeMessage();
-                localStorage.setItem('welcomeMessageDisplayed', 'true');
-            }
+        })
+        .catch(error => {
+            console.error('Error fetching chat content:', error);
         });
-        var messageContainer = document.getElementById('messageContainer');
+}
 
-        // Function to scroll to the bottom of the container
-        function scrollToBottom() {
-            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+    function displayWelcomeMessage() {
+        const userName = @json(auth()->user()->name);
+        const welcomeMessage = `<div class="text-center p-12">
+                                    <h1 class="text-3xl font-bold">Welcome, ${userName}!</h1>
+                                    <p class="text-lg">To the Laravel chat application</p>
+                                </div>`;
+        document.getElementById('chat-content').innerHTML = welcomeMessage;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check session storage for the last opened chat user ID
+        const lastActiveUser = sessionStorage.getItem('activeChatUser');
+
+        // Check local storage to see if the welcome message has been displayed
+        const welcomeMessageDisplayed = localStorage.getItem('welcomeMessageDisplayed');
+
+        if (lastActiveUser) {
+            openChat(lastActiveUser);
+        } else if (!welcomeMessageDisplayed) {
+            displayWelcomeMessage();
+            localStorage.setItem('welcomeMessageDisplayed', 'true');
         }
-    </script>
+    });
+    var messageContainer = document.getElementById('messageContainer');
+
+    // Function to scroll to the bottom of the container
+    function scrollToBottom() {
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    }
+</script>
 </x-app-layout>
 
 <style>
-.notification-circle {
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background-color: lightgreen;
-    color: black;
-    text-align: center;
-    line-height: 20px;
-    font-size: 12px;
-    display: inline-block;
-}
+    .notification-circle {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background-color: lightgreen;
+        color: black;
+        text-align: center;
+        line-height: 20px;
+        font-size: 12px;
+        display: inline-block;
+    }
 
     .border-custom {
         border-top: 4px solid skyblue;

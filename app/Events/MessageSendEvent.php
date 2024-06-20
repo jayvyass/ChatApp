@@ -4,41 +4,35 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
- 
+
 class MessageSendEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * Create a new event instance.
-     */
     public $message;
+    public $receiver_id;
+
     public function __construct($message)
     {
         $this->message = $message;
+        $this->receiver_id = $message->receiver_id;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
-     */
-    // In messagesendevent.php
-
     public function broadcastOn()
-{
-    return new PrivateChannel('chat-channel.' . $this->message->receiver_id);
-}
+    {
+        return [new PrivateChannel('chat-channel.' . $this->receiver_id)];
+    }
 
-public function broadcastWith()
-{
-    return ['message' => $this->message];
-}
-
+    public function broadcastWith()
+    {
+        return [
+            'message' => $this->message,
+            'receiver_id' => $this->receiver_id,
+        ];
+    }
     
 }
