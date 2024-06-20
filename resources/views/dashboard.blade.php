@@ -62,6 +62,7 @@
         <!-- Chat Section (70% width) -->
         <div class="w-2/3 bg-white shadow-sm sm:rounded-lg h-full overflow-hidden relative" id="chat-container" style="height: 100%;">
             <div class="text-gray-900 h-full p-6" id="chat-content">
+                <div id="messageContainer">
                 <!-- Welcome message will be displayed here -->
             </div>
         </div>
@@ -77,7 +78,6 @@
     }
     document.getElementById('user-' + userId).classList.add('active-user');
     activeUser = userId;
-
     // Save the currently active chat user ID to session storage
     sessionStorage.setItem('activeChatUser', userId);
 
@@ -94,7 +94,7 @@
         .catch(error => {
             console.error('Error fetching chat content:', error);
         });
-}
+    }       
 
 
     function displayWelcomeMessage() {
@@ -120,10 +120,10 @@
             localStorage.setItem('welcomeMessageDisplayed', 'true');
         }
     });
-    var messageContainer = document.getElementById('messageContainer');
-
+   
     // Function to scroll to the bottom of the container
     function scrollToBottom() {
+        const messageContainer = document.getElementById('messageContainer');
         messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 </script>

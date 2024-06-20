@@ -158,28 +158,39 @@
             event.preventDefault();
             // Trigger the form submission
             messageForm.dispatchEvent(new Event('submit'));
-            scrollToBottom();           
+            scrollToBottom();
         }
     });
+    scrollToBottom();
+
     messageForm.addEventListener('submit', function(event) {
         event.preventDefault();
+        @this.sendMessage().then(() => {
+            messageInput.value = '';
+            scrollToBottom();
+        });
     });
-   
+
     // Listen for the broadcast event
     Echo.private('chat-channel.{{ auth()->user()->id }}')
         .listen('MessageSendEvent', (e) => {
             addMessageToChatWindow(e.message);
+            scrollToBottom(); 
         });
 
     function addMessageToChatWindow(message) {
         // Create a message element
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
-        // Customize the message content and appearance based on the sender
         messageElement.textContent = message.content; // Add the message content
-        chatMessages.appendChild(messageElement);        
+        chatMessages.appendChild(messageElement);
+        scrollToBottom();
     }   
-    scrollToBottom();
 
+    // Scroll to the bottom on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        scrollToBottom();
+    });
 </script>
+
 

@@ -1,0 +1,1 @@
+@livewire('user-list')
